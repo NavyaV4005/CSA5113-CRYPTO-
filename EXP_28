@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+long long modexp(long long base, long long exp, long long mod) {
+    long long result = 1;
+    base %= mod;
+    while (exp > 0) {
+        if (exp & 1) result = (result * base) % mod;
+        base = (base * base) % mod;
+        exp >>= 1;
+    }
+    return result;
+}
+
+int main() {
+    long long q = 23, a = 5;
+    long long x = 6, y = 15;    
+    
+    long long A = modexp(a, x, q);
+    long long B = modexp(a, y, q);
+    
+    long long keyAlice = modexp(B, x, q);
+    long long keyBob = modexp(A, y, q);
+    
+    printf("Alice's key: %lld\nBob's key: %lld\n", keyAlice, keyBob);
+    return 0;
+}
