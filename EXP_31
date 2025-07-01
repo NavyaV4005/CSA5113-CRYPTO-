@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <string.h>
+
+void mock_aes_encrypt(unsigned char *output) {
+    unsigned char dummy[16] = {
+        0x6B, 0xC1, 0xBE, 0xE2, 0x2E, 0x40, 0x9F, 0x96,
+        0xE9, 0x3D, 0x7E, 0x11, 0x73, 0x93, 0x17, 0x2A
+    };
+    memcpy(output, dummy, 16);
+}
+
+void left_shift(unsigned char *input, unsigned char *output) {
+    int carry = 0;
+    for (int i = 15; i >= 0; i--) {
+        output[i] = (input[i] << 1) | carry;
+        carry = (input[i] & 0x80) ? 1 : 0;
+    }
+}
+
+void xor_rb(unsigned char *block) {
+    block[15] ^= 0x87;  
+}
+
+void generate_subkeys(unsigned char *K1, unsigned char *K2) {
+    unsigned char L[16];
+    mock_aes_encrypt(L);  
+
+    left_shift(L, K1);
+    if (L[0] & 0x80) xor_rb(K1);
+
+    left_shift(K1, K2);
+    if (K1[0] & 0x80) xor_rb(K2);
+}
+
+int main() {
+    unsigned char K1[16], K2[16];
+    generate_subkeys(K1, K2);
+    printf("K1: ");
+    for (int i = 0; i < 16; i++) printf("%02X ", K1[i]);
+    printf("\n")
+    printf("K2: ");
+    for (int i = 0; i < 16; i++) printf("%02X ", K2[i]);
+    printf("\n");
+
+    return 0;
+}
