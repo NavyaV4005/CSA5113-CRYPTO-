@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+int gcd(int a, int b) {
+    while (b) { int t = b; b = a % b; a = t; }
+    return a;
+}
+
+int modinv(int e, int phi) {
+    for (int d = 1; d < phi; d++)
+        if ((e * d) % phi == 1) return d;
+    return -1;
+}
+
+int modexp(int base, int exp, int mod) {
+    int result = 1;
+    for (; exp > 0; exp >>= 1) {
+        if (exp % 2) result = (result * base) % mod;
+        base = (base * base) % mod;
+    }
+    return result;
+}
+
+int main() {
+    int p = 13, q = 17;
+    int n = p * q;
+    int phi = (p - 1) * (q - 1);
+    int e = 5;
+    int d = modinv(e, phi);
+
+    int msg = 12;
+    int enc = modexp(msg, e, n);
+    int dec = modexp(enc, d, n);
+
+    printf("Public Key (e, n): (%d, %d)\n", e, n);
+    printf("Private Key (d): %d\n", d);
+    printf("Original: %d\nEncrypted: %d\nDecrypted: %d\n", msg, enc, dec);
+    return 0;
+}
