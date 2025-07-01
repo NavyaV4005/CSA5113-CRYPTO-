@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+#define MAX 512
+#define TOP 10
+
+const char eng_freq[] = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+
+typedef struct {
+    char text[MAX];
+    double score;
+} Candidate;
+
+void freq(const char *txt, double f[26]) {
+    int c[26] = {0}, tot = 0;
+    for (int i=0; txt[i]; i++)
+        if (isalpha(txt[i])) c[toupper(txt[i])-'A']++, tot++;
+    for(int i=0; i<26; i++) f[i] = tot ? (double)c[i]/tot : 0;
+}
+
+double score_text(const char *txt) {
+    double f[26], s=0;
+    freq(txt,f);
+    for(int i=0; i<26; i++) s += f[eng_freq[i]-'A'] * (26 - i);
+    return s;
+}
+
+void substitute(const char *c, char *p, char map[26]) {
+    for(int i=0; c[i]; i++) {
+        if (isalpha(c[i])) {
+            char ch = map[toupper(c[i])-'A'];
+            p[i] = islower(c[i]) ? tolower(ch) : ch;
+        } else p[i] = c[i];
+    }
+    p[strlen(c)] = 0;
+}
+
+int cmp(const void *a, const void *b) {
+    return ((Candidate*)b)->score - ((Candidate*)a)->score > 0 ? 1 : -1;
+}
+
+int main() {
+    char ct[MAX];
+    Candidate cands[TOP];
+    char map[26];
+    printf("Enter ciphertext:\n");
+    fgets(ct, MAX, stdin);
+    ct[strcspn(ct,"\n")] = 0;
+
+    for(int shift=0; shift<TOP; shift++) {
+        for(int i=0; i<26; i++) map[i] = eng_freq[(i+shift)%26];
+        substitute(ct, cands[shift].text, map);
+        cands[shift].score = score_text(cands[shift].text);
+    }
+    qsort(cands, TOP, sizeof(Candidate), cmp);
+    printf("\nTop %d plaintext guesses:\n", TOP);
+    for(int i=0; i<TOP; i++)
+        printf("[%d] Score: %.3f\n%s\n\n", i+1, cands[i].score, cands[i].text);
+    return 0;
+}
