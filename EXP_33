@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdint.h>
+
+uint32_t feistel(uint32_t half_block, uint32_t subkey) {
+    return (half_block ^ subkey);
+}
+
+void des_encrypt(uint64_t plaintext, uint64_t key, uint64_t *ciphertext) {
+    uint32_t L = (plaintext >> 32) & 0xFFFFFFFF;
+    uint32_t R = plaintext & 0xFFFFFFFF;
+    uint32_t round_keys[16];
+    for (int i = 0; i < 16; i++) round_keys[i] = (key >> (i % 28)) & 0xFFFFFFFF;
+    for (int i = 0; i < 16; i++) {
+        uint32_t temp = R;
+        R = L ^ feistel(R, round_keys[i]);
+        L = temp;
+    }
+    *ciphertext = ((uint64_t)R << 32) | L;
+}
+
+void des_decrypt(uint64_t ciphertext, uint64_t key, uint64_t *plaintext) {
+    uint32_t L = (ciphertext >> 32) & 0xFFFFFFFF;
+    uint32_t R = ciphertext & 0xFFFFFFFF;
+    uint32_t round_keys[16];
+    for (int i = 0; i < 16; i++) round_keys[i] = (key >> (i % 28)) & 0xFFFFFFFF;
+    for (int i = 15; i >= 0; i--) {
+        uint32_t temp = L;
+        L = R ^ feistel(L, round_keys[i]);
+        R = temp;
+    }
+    *plaintext = ((uint64_t)L << 32) | R;
+}
+
+int main() {
+    uint64_t plaintext = 0x0123456789ABCDEF;
+    uint64_t key = 0x133457799BBCDFF1;
+    uint64_t ciphertext, decrypted;
+    des_encrypt(plaintext, key, &ciphertext);
+    printf("Encrypted: %016llX\n", ciphertext);
+    des_decrypt(ciphertext, key, &decrypted);
+    printf("Decrypted: %016llX\n", decrypted);
+    return 0;
+}
