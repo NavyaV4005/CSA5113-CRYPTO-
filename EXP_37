@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+const char eng_freq_order[] = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+void letterFrequency(char *text, int freq[26]) {
+    for (int i = 0; i < 26; i++) freq[i] = 0;
+    for (int i = 0; text[i]; i++) {
+        if (isalpha(text[i])) {
+            freq[toupper(text[i]) - 'A']++;
+        }
+    }
+}
+
+void sortLettersByFreq(int freq[26], char letters[26]) {
+    for (int i = 0; i < 26; i++) letters[i] = 'A' + i;
+    for (int i = 0; i < 25; i++) {
+        for (int j = 0; j < 25 - i; j++) {
+            if (freq[j] < freq[j + 1]) {
+                int tmpf = freq[j];
+                freq[j] = freq[j + 1];
+                freq[j + 1] = tmpf;
+                char tmpc = letters[j];
+                letters[j] = letters[j + 1];
+                letters[j + 1] = tmpc;
+            }
+        }
+    }
+}
+
+void substitute(char *ciphertext, char *plaintext, char map[26]) {
+    int len = strlen(ciphertext);
+    for (int i = 0; i < len; i++) {
+        char c = ciphertext[i];
+        if (isalpha(c)) {
+            int idx = toupper(c) - 'A';
+            char sub = map[idx];
+            plaintext[i] = isupper(c) ? sub : tolower(sub);
+        } else {
+            plaintext[i] = c;
+        }
+    }
+    plaintext[len] = '\0';
+}
+
+int main() {
+    char ciphertext[512], plaintext[512];
+    int freq[26];
+    char sorted_letters[26], map[26];
+
+    printf("Enter ciphertext:\n");
+    fgets(ciphertext, sizeof(ciphertext), stdin);
+    ciphertext[strcspn(ciphertext, "\n")] = 0;
+
+    letterFrequency(ciphertext, freq);
+    sortLettersByFreq(freq, sorted_letters);
+
+    for (int i = 0; i < 26; i++) {
+        map[sorted_letters[i] - 'A'] = eng_freq_order[i];
+    }
+
+    substitute(ciphertext, plaintext, map);
+    printf("\nProbable plaintext:\n%s\n", plaintext);
+
+    return 0;
+}
