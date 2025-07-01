@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <string.h>
+#define BLOCK_SIZE 8
+void pad(char *data) {
+    int len = strlen(data);
+    data[len] = 1;
+    for (int i = len + 1; i < len + BLOCK_SIZE; i++) data[i] = 0;
+    data[len + BLOCK_SIZE] = '\0';
+}
+
+void ecb_encrypt(const char *plaintext, char *ciphertext, const char *key) {
+    for (int i = 0; i < strlen(plaintext); i += BLOCK_SIZE) {
+        for (int j = 0; j < BLOCK_SIZE; j++) {
+            ciphertext[i + j] = plaintext[i + j] ^ key[j];
+        }
+    }
+}
+
+int main() {
+    char plaintext[64] = "blockdata";
+    char key[BLOCK_SIZE] = "12345678";
+    char ciphertext[64] = {0};
+
+    pad(plaintext);
+    ecb_encrypt(plaintext, ciphertext, key);
+
+    printf("Ciphertext (ECB): ");
+    for (int i = 0; i < strlen(plaintext); i++) printf("%02X ", (unsigned char)ciphertext[i]);
+    printf("\n");
+
+    return 0;
+}
