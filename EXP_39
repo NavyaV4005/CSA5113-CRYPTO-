@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+const double eng_freq[26] = {
+    8.167,1.492,2.782,4.253,12.702,2.228,2.015,6.094,
+    6.966,0.153,0.772,4.025,2.406,6.749,7.507,1.929,
+    0.095,5.987,6.327,9.056,2.758,0.978,2.360,0.150,
+    1.974,0.074
+};
+
+double score(char *text) {
+    int freq[26] = {0}, len = 0;
+    for (int i = 0; text[i]; i++)
+        if (isalpha(text[i])) freq[toupper(text[i])-'A']++, len++;
+    if (len == 0) return 0;
+    double s = 0;
+    for (int i = 0; i < 26; i++)
+        s += (freq[i] * 100.0 / len) * eng_freq[i];
+    return s;
+}
+
+void decrypt(char *ct, char *pt, int key) {
+    for (int i = 0; ct[i]; i++) {
+        char c = ct[i];
+        if (isupper(c)) pt[i] = ((c - 'A' - key + 26) % 26) + 'A';
+        else if (islower(c)) pt[i] = ((c - 'a' - key + 26) % 26) + 'a';
+        else pt[i] = c;
+    }
+    pt[strlen(ct)] = 0;
+}
+
+int main() {
+    char ct[512] = "Wklv lv d whvw phvvdjh.";  // <--- input is hardcoded
+    char pt[512];
+    double best_score = -1;
+    int best_key = 0;
+    for (int k = 0; k < 26; k++) {
+        decrypt(ct, pt, k);
+        double sc = score(pt);
+        if (sc > best_score) {
+            best_score = sc;
+            best_key = k;
+        }
+    }
+    decrypt(ct, pt, best_key);
+    printf("Best key: %d\nPlaintext: %s\n", best_key, pt);
+    return 0;
+}
