@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define MAX 100
+
+void encrypt(char *plain, int *key, char *cipher) {
+    for (int i = 0; plain[i] != '\0'; i++) {
+        cipher[i] = ((plain[i] - 'A') + key[i]) % 26 + 'A';
+    }
+}
+
+void decrypt(char *cipher, int *key, char *plain) {
+    for (int i = 0; cipher[i] != '\0'; i++) {
+        plain[i] = ((cipher[i] - 'A') - key[i] + 26) % 26 + 'A';
+    }
+}
+
+int main() {
+    char plaintext[MAX] = "HELLOWORLD";
+    char ciphertext[MAX] = {0};
+    char decrypted[MAX] = {0};
+    int key[MAX];
+
+    srand(time(NULL));
+    for (int i = 0; plaintext[i] != '\0'; i++) {
+        key[i] = rand() % 26;
+    }
+
+    encrypt(plaintext, key, ciphertext);
+    decrypt(ciphertext, key, decrypted);
+
+    printf("Plaintext: %s\n", plaintext);
+    printf("Ciphertext: %s\n", ciphertext);
+    printf("Decrypted: %s\n", decrypted);
+
+    return 0;
+}
