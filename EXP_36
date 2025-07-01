@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <string.h>
+
+int gcd(int a, int b) {
+    while(b) { int t = b; b = a % b; a = t; }
+    return a;
+}
+
+int modInv(int a, int m) {
+    for(int x = 1; x < m; x++) if((a * x) % m == 1) return x;
+    return -1;
+}
+
+void affine(char *in, char *out, int a, int b, int mode) {
+    int inv = (mode == 1) ? modInv(a, 26) : a;
+    for(int i = 0; in[i]; i++) {
+        char c = in[i];
+        if(c >= 'A' && c <= 'Z') {
+            int x = c - 'A';
+            out[i] = mode ? (inv * (x - b + 26)) % 26 + 'A' : (a * x + b) % 26 + 'A';
+        } else if(c >= 'a' && c <= 'z') {
+            int x = c - 'a';
+            out[i] = mode ? (inv * (x - b + 26)) % 26 + 'a' : (a * x + b) % 26 + 'a';
+        } else out[i] = c;
+    }
+    out[strlen(in)] = 0;
+}
+
+int main() {
+    int a = 5, b = 8;
+    if(gcd(a, 26) != 1) {
+        printf("'a' not coprime with 26\n");
+        return 1;
+    }
+
+    char text[100], enc[100], dec[100];
+    printf("Enter text: ");
+    fgets(text, 100, stdin);
+    text[strcspn(text, "\n")] = 0;  // Remove newline
+
+    affine(text, enc, a, b, 0);
+    printf("Encrypted: %s\n", enc);
+
+    affine(enc, dec, a, b, 1);
+    printf("Decrypted: %s\n", dec);
+
+    return 0;
+}
