@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define SIZE 25
+
+void mixLanes(bool *lanes) {
+    bool temp[SIZE];
+    for (int i = 0; i < SIZE; i++)
+        temp[(i + 1) % SIZE] = lanes[i];
+    for (int i = 0; i < SIZE; i++)
+        lanes[i] = lanes[i] || temp[i];
+}
+
+int main() {
+    bool lanes[SIZE] = {0};
+    for (int i = 0; i < 16; i++) lanes[i] = true;  
+    for (int i = 16; i < SIZE; i++) lanes[i] = false; 
+    
+    int rounds = 0;
+    while (1) {
+        bool allCapacityNonzero = true;
+        for (int i = 16; i < SIZE; i++) {
+            if (!lanes[i]) {
+                allCapacityNonzero = false;
+                break;
+            }
+        }
+        if (allCapacityNonzero) break;
+        mixLanes(lanes);
+        rounds++;
+    }
+    
+    printf("Rounds until all capacity lanes are nonzero: %d\n", rounds);
+    return 0;
+}
